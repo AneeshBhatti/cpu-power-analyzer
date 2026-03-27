@@ -5,6 +5,7 @@ import threading
 
 from monitor import collect_metrics
 from workload import run_idle, run_stress
+from analysis import load_csv, summarize_metrics, detect_anomalies, print_report
 
 def save_to_csv(samples, output_file):
     os.makedirs("logs", exist_ok=True)
@@ -48,6 +49,11 @@ def main():
     save_to_csv(samples, output_file)
 
     print(f"\nSaved to {output_file}")
+
+    rows = load_csv(output_file)
+    summary = summarize_metrics(rows)
+    anomalies = detect_anomalies(summary, args.mode)
+    print_report(args.mode, summary, anomalies)
 
 if __name__ == "__main__":
     main()
