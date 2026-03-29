@@ -64,3 +64,17 @@ def print_report(mode, summary, anomalies):
             print(f"- {anomaly}")
     else:
         print("- None detected")
+
+def compare_modes(idle_file, stress_file):
+    idle = load_csv(idle_file)
+    stress = load_csv(stress_file)
+
+    idle_summary = summarize_metrics(idle)
+    stress_summary = summarize_metrics(stress)
+
+    print("\n===== Comparison =====")
+    print(f"Idle Avg CPU: {idle_summary['avg_cpu_percent']}%")
+    print(f"Stress Avg CPU: {stress_summary['avg_cpu_percent']}%")
+
+    diff = stress_summary['avg_cpu_percent'] - idle_summary['avg_cpu_percent']
+    print(f"CPU Increase: {round(diff, 2)}%")
