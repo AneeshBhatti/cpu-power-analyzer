@@ -10,6 +10,8 @@ def load_csv(filepath):
                 "timestamp": float(row["timestamp"]),
                 "cpu_percent": float(row["cpu_percent"]),
                 "memory_percent": float(row["memory_percent"]),
+                "cpu_count": int(row["cpu_count"]) if "cpu_count" in row and row["cpu_count"] else None,
+                "load_avg": float(row["load_avg"]) if "load_avg" in row and row["load_avg"] else None,
             })
     return rows
 
@@ -35,20 +37,14 @@ def summarize_metrics(rows):
 def detect_anomalies(summary, mode):
     anomalies = []
 
-    if summary["max_cpu_percent"] > 95:
-        anomalies.append("CPU usage spiked above 95%")
+    if mode == "idle" and summary["max_cpu_percent"] > 95:
+        anomalies.append("Unexpected CPU usage spike during idle")
 
-    if summary["max_memory_percent"] > 85:
-        anomalies.append("Memory usage exceeded 85%")
-
-    if mode == "stress" and summary["avg_cpu_percent"] < 50:
+    if mode == "stress" and summary["avg_cpu_percent"] < 35:
         anomalies.append("Stress workload produced unexpectedly low average CPU usage")
 
     if mode == "idle" and summary["avg_cpu_percent"] > 40:
         anomalies.append("Idle workload showed unexpectedly high average CPU usage")
-
-    if summary["cpu_stddev"] > 30:
-        anomalies.append("CPU usage showed high variance across amples")
     
     return anomalies
 

@@ -2,6 +2,7 @@ import csv
 import os
 import argparse
 import threading
+import time
 
 from monitor import collect_metrics
 from workload import run_idle, run_stress
@@ -11,7 +12,7 @@ def save_to_csv(samples, output_file):
     os.makedirs("logs", exist_ok=True)
 
     with open(output_file, "w", newline="") as csvfile:
-        fieldnames = ["timestamp", "cpu_percent", "memory_percent"]
+        fieldnames = ["timestamp", "cpu_percent", "memory_percent", "load_avg", "cpu_count",]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
@@ -45,7 +46,7 @@ def main():
 
     workload_thread.join()
 
-    output_file = f"logs/{args.mode}_metrics.csv"
+    output_file = f"logs/{args.mode}_run_{int(time.time())}.csv"
     save_to_csv(samples, output_file)
 
     print(f"\nSaved to {output_file}")
