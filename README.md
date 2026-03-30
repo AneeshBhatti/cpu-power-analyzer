@@ -52,6 +52,7 @@ The project is structured into modular components:
 
 ---
 
+![Dashboard] (assets/dashboard.png)
 ## Usage
 
 ### Install dependencies
