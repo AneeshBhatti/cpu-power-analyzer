@@ -8,6 +8,7 @@ from monitor import collect_metrics
 from workload import run_idle, run_stress
 from analysis import load_csv, summarize_metrics, detect_anomalies, print_report
 
+# Save collected samples to a CSV file for later analysis
 def save_to_csv(samples, output_file):
     os.makedirs("logs", exist_ok=True)
 
@@ -18,6 +19,7 @@ def save_to_csv(samples, output_file):
         writer.writeheader()
         writer.writerows(samples)
 
+# Collect one sample per second for the requested duration
 def run_monitoring(duration):
     samples = []
     for _ in range(duration):
@@ -32,6 +34,7 @@ def main():
     parser.add_argument("--duration", type=int, default=10)
     args = parser.parse_args()
 
+    # Select the workload type to run during monitoring
     if args.mode == "idle":
         workload = run_idle
     else:
@@ -39,6 +42,7 @@ def main():
     
     print(f"Running {args.mode} mode for {args.duration} seconds")
 
+    # Run workload in the background while the main thread samples metrics
     workload_thread = threading.Thread(target=workload, args=(args.duration,))
     workload_thread.start()
 
@@ -46,11 +50,13 @@ def main():
 
     workload_thread.join()
 
+    # Save each run with a timestampled filename
     output_file = f"logs/{args.mode}_run_{int(time.time())}.csv"
     save_to_csv(samples, output_file)
 
     print(f"\nSaved to {output_file}")
 
+    # Reload the saved CSV so analysis is based on the stored run output
     rows = load_csv(output_file)
     summary = summarize_metrics(rows)
     anomalies = detect_anomalies(summary, args.mode)

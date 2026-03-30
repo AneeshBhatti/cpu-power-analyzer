@@ -2,6 +2,7 @@ import time
 import psutil
 import os
 
+#Collect a single snapshot of system metrics
 def collect_metrics():
     return {
         "timestamp": time.time(),

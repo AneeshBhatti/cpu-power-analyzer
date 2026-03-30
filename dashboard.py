@@ -10,6 +10,7 @@ from analysis import summarize_metrics, detect_anomalies
 st.set_page_config(page_title="CPU Monitor Dashboard", layout="wide")
 st.title("CPU Power & Performance Dashboard")
 
+# Session state keeps monitoring data across Stremlit reruns
 if "data" not in st.session_state:
     st.session_state["data"] = []
 
@@ -30,19 +31,23 @@ st.session_state["selected_mode"] = selected_mode
 
 col_a, col_b, col_c = st.columns(3)
 
+# Start a new monitoring session and clear any prior run data
 if col_a.button("Start Monitoring"):
     st.session_state["data"] = []
     st.session_state["monitoring"] = True
 
+# Stop sampling but keep collected data visible for summary review
 if col_b.button("Stop Monitoring"):
     st.session_state["monitoring"] = False
 
+# Clear stored samples entirely
 if col_c.button("Clear Data"):
     st.session_state["data"] = []
     st.session_state["monitoring"] = False
 
 st.write(f"Monitoring active: {'Yes' if st.session_state['monitoring'] else 'No'}")
 
+# While monitoring is enabled, refresh automatically and append new samples
 if st.session_state["monitoring"]:
     st_autorefresh(interval=refresh_rate * 1000, key="monitor_refresh")
 
@@ -69,12 +74,14 @@ if st.session_state["data"]:
     col2.metric("Memory %", f"{latest['memory_percent']:.1f}%")
     col3.metric("Load Avg", f"{latest['load_avg']:.2f}")
     col4.metric("CPU Count", int(latest['cpu_count']))
-        
+    
+    # Plot CPU, memory, and laod average over time
     chart_df = df[["timestamp", "cpu_percent", "memory_percent", "load_avg"]].copy()
     chart_df["timestamp"] = pd.to_datetime(chart_df["timestamp"], unit="s")
     chart_df = chart_df.set_index("timestamp")
     st.line_chart(chart_df)
 
+    # Show summary and anomaly results after monitoring stops
     if not st.session_state["monitoring"]:
         rows = df.to_dict(orient="records")
         summary = summarize_metrics(rows)
